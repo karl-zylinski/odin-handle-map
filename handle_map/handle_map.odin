@@ -74,7 +74,7 @@ add :: proc(m: ^Handle_Map($T, $HT), v: T, loc := #caller_location) -> HT {
 	new_item.handle.idx = u32(builtin.len(m.items))
 	new_item.handle.gen = 1
 	append(&m.items, new_item)
-	return new_item.handle
+	return new_item.handle 
 }
 
 get :: proc(m: Handle_Map($T, $HT), h: HT) -> ^T {
@@ -119,19 +119,7 @@ make_iter :: proc(m: ^Handle_Map($T, $HT)) -> Handle_Map_Iterator(T, HT) {
 	return { m = m }
 }
 
-iter :: proc(it: ^Handle_Map_Iterator($T, $HT)) -> (val: T, h: HT, cond: bool) {
-	val_ptr: ^T
-
-	val_ptr, h, cond = iter_ptr(it)
-
-	if val_ptr != nil {
-		val = val_ptr^
-	}
-
-	return
-}
-
-iter_ptr :: proc(it: ^Handle_Map_Iterator($T, $HT)) -> (val: ^T, h: HT, cond: bool) {
+iter :: proc(it: ^Handle_Map_Iterator($T, $HT)) -> (val: ^T, h: HT, cond: bool) {
 	cond = it.index < builtin.len(it.m.items)
 
 	for ; cond; cond = it.index < builtin.len(it.m.items) {
@@ -143,7 +131,7 @@ iter_ptr :: proc(it: ^Handle_Map_Iterator($T, $HT)) -> (val: ^T, h: HT, cond: bo
 		val = it.m.items[it.index]
 		h = val.handle
 		it.index += 1
-		break
+		return
 	}
 
 	return
