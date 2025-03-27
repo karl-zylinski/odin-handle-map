@@ -1,8 +1,9 @@
 package handle_map
 
-import "core:fmt"
 import "core:mem"
-import "core:slice"
+import "base:runtime"
+import "base:builtin"
+import "core:fmt"
 import vmem "core:mem/virtual"
 
 _ :: fmt
@@ -21,10 +22,10 @@ Handle_Map :: struct($T: typeid, $HT: typeid) {
 	zero_item: T,
 }
 
-destroy :: proc(m: ^Handle_Map($T, $HT), loc := #caller_location) {
+delete :: proc(m: ^Handle_Map($T, $HT), loc := #caller_location) {
 	vmem.arena_destroy(&m.items_arena)
-	delete(m.items, loc)
-	delete(m.unused_items, loc)
+	runtime.delete(m.items, loc)
+	runtime.delete(m.unused_items, loc)
 }
 
 clear :: proc(m: ^Handle_Map($T, $HT), loc := #caller_location) {
@@ -33,22 +34,27 @@ clear :: proc(m: ^Handle_Map($T, $HT), loc := #caller_location) {
 	clear(&m.unused_items)
 }
 
-make_handle_map :: proc($T: typeid, $HT: typeid, allocator: mem.Allocator, loc := #caller_location) -> Handle_Map(T, HT) {
-	return {
-		items = make([dynamic]T, allocator, loc),
-		unused_items = make([dynamic]u32, allocator, loc)
+DEFAULT_ITEMS_PER_BLOCK :: 1024
+
+make :: proc($T: typeid, $HT: typeid, allocator: mem.Allocator, loc := #caller_location) -> Handle_Map(T, HT) {
+	m := Handle_Map(T, HT) {
+		items = runtime.make([dynamic]^T, allocator, loc),
+		unused_items = runtime.make([dynamic]u32, allocator, loc),
 	}
+
+	err := vmem.arena_init_growing(&m.items_arena, DEFAULT_ITEMS_PER_BLOCK * size_of(T))
+	fmt.ensuref(err == nil, "Error initializing arena: %v", err)
+	return m
 }
 
 add :: proc(m: ^Handle_Map($T, $HT), v: T, loc := #caller_location) -> HT {
 	if m.items == nil {
-		m.items = make([dynamic]^T, context.allocator, loc)
-		m.unused_items = make([dynamic]u32, context.allocator, loc)
+		m^ = make(T, HT, context.allocator, loc)
 	}
 
 	v := v
 
-	if len(m.unused_items) > 0 {
+	if builtin.len(m.unused_items) > 0 {
 		reuse_idx := pop(&m.unused_items)
 		reused := m.items[reuse_idx]
 		h := reused.handle
@@ -60,29 +66,21 @@ add :: proc(m: ^Handle_Map($T, $HT), v: T, loc := #caller_location) -> HT {
 
 	items_allocator := vmem.arena_allocator(&m.items_arena)
 
-	if len(m.items) == 0 {
+	if builtin.len(m.items) == 0 {
 		zero_dummy := new(T, items_allocator)
 		append(&m.items, zero_dummy)
 	}
 
 	new_item := new(T, items_allocator)
 	new_item^ = v
-	new_item.handle.idx = u32(len(m.items))
+	new_item.handle.idx = u32(builtin.len(m.items))
 	new_item.handle.gen = 1
 	append(&m.items, new_item)
 	return new_item.handle
 }
 
-get :: proc(m: Handle_Map($T, $HT), h: HT) -> (T, bool) #optional_ok {
-	if ptr := get_ptr(m, h); ptr != nil {
-		return ptr^, true
-	}
-
-	return {}, false
-}
-
-get_ptr :: proc(m: Handle_Map($T, $HT), h: HT) -> ^T {
-	if h.idx <= 0 || h.idx >= u32(len(m.items)) {
+get :: proc(m: Handle_Map($T, $HT), h: HT) -> ^T {
+	if h.idx <= 0 || h.idx >= u32(builtin.len(m.items)) {
 		return nil
 	}
 
@@ -94,7 +92,7 @@ get_ptr :: proc(m: Handle_Map($T, $HT), h: HT) -> ^T {
 }
 
 remove :: proc(m: ^Handle_Map($T, $HT), h: HT) {
-	if h.idx <= 0 || h.idx >= u32(len(m.items)) {
+	if h.idx <= 0 || h.idx >= u32(builtin.len(m.items)) {
 		return
 	}
 
@@ -108,6 +106,10 @@ remove :: proc(m: ^Handle_Map($T, $HT), h: HT) {
 
 valid :: proc(m: Handle_Map($T, $HT), h: HT) -> bool {
 	return get_ptr(m, h) != nil
+}
+
+len :: proc(m: Handle_Map($T, $HT)) -> int {
+	return builtin.len(m.items) - builtin.len(m.unused_items) - 1
 }
 
 Handle_Map_Iterator :: struct($T: typeid, $HT: typeid) {
@@ -132,15 +134,15 @@ iter :: proc(it: ^Handle_Map_Iterator($T, $HT)) -> (val: T, h: HT, cond: bool) {
 }
 
 iter_ptr :: proc(it: ^Handle_Map_Iterator($T, $HT)) -> (val: ^T, h: HT, cond: bool) {
-	cond = it.index < len(it.m.items)
+	cond = it.index < builtin.len(it.m.items)
 
-	for ; cond; cond = it.index < len(it.m.items) {
+	for ; cond; cond = it.index < builtin.len(it.m.items) {
 		if it.m.items[it.index].handle.idx == 0 {
 			it.index += 1
 			continue
 		}
 
-		val = &it.m.items[it.index]
+		val = it.m.items[it.index]
 		h = val.handle
 		it.index += 1
 		break
