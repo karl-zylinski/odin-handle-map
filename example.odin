@@ -8,7 +8,7 @@ import "core:math/linalg"
 
 Entity :: struct {
 	handle: Entity_Handle,
-	mat: matrix[4, 4]f32,
+	pos: [3]f32,
 }
 
 Entity_Handle :: distinct hm.Handle
@@ -18,38 +18,14 @@ NUM_ENTITIES :: 1000
 comparison_array: [NUM_ENTITIES]Entity
 
 main :: proc() {
-	m := hm.make(Entity, Entity_Handle, min_items_per_block = 2048)/*
-	h1 := hm.add(&m, Entity { pos = {2, 1} })
-	h2 := hm.add(&m, Entity { pos = {3, 1} })
+	m := hm.make(Entity, Entity_Handle, min_items_per_block = 2048)
 
-	assert(h1.idx == 1)
-	assert(h2.idx == 2)
-	hm.remove(&m, h1)
-
-	h3 := hm.add(&m, Entity { pos = {4,1 }})
-	assert(h3.idx == 1)
-
-	m_iter := hm.make_iter(&m)
-
-	for e in hm.iter_ptr(&m_iter) {
-		fmt.println(e.pos)
-	}
-
-	h1e := hm.get(m, h1)*/
-
-	comp2: [dynamic]Entity
+	dynamic_comparison_array: [dynamic]Entity
 
 	for i in 0..<NUM_ENTITIES {
-		rm := matrix[4,4]f32 {
-			rand.float32_range(-1, 1), rand.float32_range(-1, 1), rand.float32_range(-1, 1), rand.float32_range(-1, 1),
-			rand.float32_range(-1, 1), rand.float32_range(-1, 1), rand.float32_range(-1, 1), rand.float32_range(-1, 1),
-			rand.float32_range(-1, 1), rand.float32_range(-1, 1), rand.float32_range(-1, 1), rand.float32_range(-1, 1),
-			rand.float32_range(-1, 1), rand.float32_range(-1, 1), rand.float32_range(-1, 1), rand.float32_range(-1, 1),
-		}
-
-		e := Entity { mat = rm }
+		e := Entity { pos = { rand.float32_range(-100, 100), rand.float32_range(-100, 100), rand.float32_range(-100, 100) } }
 		hm.add(&m, e)
-		append(&comp2, e)
+		append(&dynamic_comparison_array, e)
 		comparison_array[i] = e
 	}
 
@@ -57,48 +33,57 @@ main :: proc() {
 	NUM_TESTS :: 1000
 
 	{
-		total: f32
+		nearest_to_origin: [3]f32
+		nearest_to_origin_dist: f32 = max(f32)
 		fmt.println("handle map")
 		start := time.now()
 		for _ in 0..<NUM_TESTS {
 			iter := hm.make_iter(&m)
 			for e in hm.iter(&iter) {
-				total += linalg.trace(linalg.inverse(e.mat))
+				if linalg.length(e.pos) < nearest_to_origin_dist {
+					nearest_to_origin = e.pos
+				}
 			}
 		}
 		diff := time.since(start)
 
 		fmt.println(time.duration_milliseconds(diff))
-		fmt.println(total)
+		fmt.println(nearest_to_origin)
 	}
 
 	{
-		total: f32
+		nearest_to_origin: [3]f32
+		nearest_to_origin_dist: f32 = max(f32)
 		fmt.println("dyn array")
 		start := time.now()
 		for _ in 0..<NUM_TESTS {
-			for &e in comp2 {
-				total += linalg.trace(linalg.inverse(e.mat))
+			for &e in dynamic_comparison_array {
+				if linalg.length(e.pos) < nearest_to_origin_dist {
+					nearest_to_origin = e.pos
+				}
 			}
 		}
 		diff := time.since(start)
 
 		fmt.println(time.duration_milliseconds(diff))
-		fmt.println(total)
+		fmt.println(nearest_to_origin)
 	}
 
 	{
-		total: f32
+		nearest_to_origin: [3]f32
+		nearest_to_origin_dist: f32 = max(f32)
 		fmt.println("fixed array")
 		start := time.now()
 		for _ in 0..<NUM_TESTS {
 			for &e in comparison_array {
-				total += linalg.trace(linalg.inverse(e.mat))
+				if linalg.length(e.pos) < nearest_to_origin_dist {
+					nearest_to_origin = e.pos
+				}
 			}
 		}
 		diff := time.since(start)
 
 		fmt.println(time.duration_milliseconds(diff))
-		fmt.println(total)
+		fmt.println(nearest_to_origin)
 	}
 }
