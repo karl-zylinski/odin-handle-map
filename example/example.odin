@@ -1,3 +1,13 @@
+/*
+This is a small game where the player is a black circle and it can consume
+other circles.
+
+The circles live in a handle map. Each circle is an Entity.
+
+The demo shows how to create, add, remove and iterate using the handle map.
+
+See ../example_web for a version that works in a browser.
+*/
 package handle_map_example
 
 import hm "../handle_map"
@@ -38,6 +48,9 @@ main :: proc() {
 }
 
 update :: proc() {
+	// The pointer `p` is stable, even if you remove and add things to the
+	// handle map. This is thanks to the handle map allocating each entity into
+	// a virtual growing arena.
 	p := hm.get(entities, player)
 	assert(p != nil, "Couldn't get player pointer")
 	p.pos = rl.GetMousePosition()
@@ -84,11 +97,17 @@ draw :: proc() {
 
 	ent_iter := hm.make_iter(&entities)
 	for e, h in hm.iter(&ent_iter) {
+		// e has type ^Entity and h is Entity_Handle. Handle is also accessible
+		// using e.handle.
+
 		if h == player {
 			continue
 		}
 
 		rl.DrawCircleV(e.pos, e.size, e.color)
+
+		// Draw the generation. This says how many times the slot in the handle
+		// map has been reused.
 		rl.DrawTextEx(rl.GetFontDefault(), fmt.ctprint(h.gen), e.pos - {e.size, e.size}*0.5, e.size, 1, rl.BLACK)
 	}
 
@@ -100,6 +119,10 @@ draw :: proc() {
 	rl.DrawText("entities stats", 5, 5, TEXT_SIZE, rl.BLACK)
 	rl.DrawText(fmt.ctprintf("len: %v", hm.len(entities)), 5, 5 + TEXT_SIZE, TEXT_SIZE, rl.BLACK)
 	rl.DrawText(fmt.ctprintf("unused slots: %v", len(entities.unused_items)), 5, 5 + TEXT_SIZE*2, TEXT_SIZE, rl.BLACK)
+
+	// Reserved memory is not yet associated with any physical memory: The
+	// memory usage only goes up as virtual memory is _committed_, which happens
+	// when actual allocations happen (you add things to the handle map).
 	rl.DrawText(fmt.ctprintf("reserved virtual mem: %v b", entities.items_arena.total_reserved), 5, 5 + TEXT_SIZE*3, TEXT_SIZE, rl.BLACK)
 	rl.DrawText(fmt.ctprintf("committed virtual mem: %v b", entities.items_arena.total_used), 5, 5 + TEXT_SIZE*4, TEXT_SIZE, rl.BLACK)
 
