@@ -120,6 +120,8 @@ make_iter :: proc(m: ^Handle_Map($T, $HT)) -> Handle_Map_Iterator(T, HT) {
 	return { m = m }
 }
 
+// Instead of using iterator you can also loop over `items` and check if
+// `item.handle.idx == 0` and in that case skip that item.
 iter :: proc(it: ^Handle_Map_Iterator($T, $HT)) -> (val: ^T, h: HT, cond: bool) {
 	for _ in it.index..<builtin.len(it.m.items) {
 		item := it.m.items[it.index]
