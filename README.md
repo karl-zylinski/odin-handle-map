@@ -24,9 +24,9 @@ main :: proc() {
 	entities: hm.Handle_Map(Entity, Entity_Handle)
 
 	h1 := hm.add(&entities, Entity { pos = { 5, 7 } })
-	hm.add(&entities, Entity { pos = { 10, 5 } })
+	h2 := hm.add(&entities, Entity { pos = { 10, 5 } })
 
-	if h2e := hm.get(entities, h1); h2e != nil {
+	if h2e := hm.get(entities, h2); h2e != nil {
 		h2e.pos.y = 123
 	}
 
