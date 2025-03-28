@@ -52,6 +52,8 @@ main :: proc() {
 
 		e.pos += { 5, 1}
 	}
+
+	hm.delete(&entities)
 }
 ```
 
