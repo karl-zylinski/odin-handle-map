@@ -1,10 +1,13 @@
-package handle_map_example
+package handle_map_example_web
 
 import hm "../handle_map"
 import rl "vendor:raylib"
 import "core:time"
 import "core:math/rand"
 import "core:fmt"
+import "base:runtime"
+import "core:mem"
+import "core:c"
 
 Entity :: struct {
 	handle: Entity_Handle,
@@ -17,23 +20,47 @@ Entity_Handle :: distinct hm.Handle
 entities: hm.Handle_Map(Entity, Entity_Handle)
 player: Entity_Handle
 entity_add_at: time.Time
+web_context: runtime.Context
 
-main :: proc() {
+@export
+main_start :: proc "c" () {
+	context = runtime.default_context()
+	context.allocator = emscripten_allocator()
+	runtime.init_global_temporary_allocator(1*mem.Megabyte)
+
+	web_context = context
+
+	entities = hm.make(Entity, Entity_Handle, 24)
+
+	rl.SetConfigFlags({.WINDOW_RESIZABLE})
 	rl.InitWindow(1280, 720, "Entities using Handle Map")
 
 	player = hm.add(&entities, Entity {
 		size = 30,
 		color = rl.BLACK,
 	})
+}
 
-	for !rl.WindowShouldClose() {
-		update()
-		draw()
-		free_all(context.temp_allocator)
-	}
+@export
+main_update :: proc "c" () -> bool {
+	context = web_context
+	update()
+	draw()
+	free_all(context.temp_allocator)
+	return true
+}
 
+@export
+main_end :: proc "c" () {
+	context = web_context
 	hm.delete(&entities)
 	rl.CloseWindow()
+}
+
+@export
+web_window_size_changed :: proc "c" (w: c.int, h: c.int) {
+	context = web_context
+	rl.SetWindowSize(w, h)
 }
 
 update :: proc() {
@@ -99,8 +126,8 @@ draw :: proc() {
 	rl.DrawText("entities stats", 5, 5, TEXT_SIZE, rl.BLACK)
 	rl.DrawText(fmt.ctprintf("len: %v", hm.len(entities)), 5, 5 + TEXT_SIZE, TEXT_SIZE, rl.BLACK)
 	rl.DrawText(fmt.ctprintf("unused slots: %v", len(entities.unused_items)), 5, 5 + TEXT_SIZE*2, TEXT_SIZE, rl.BLACK)
-	rl.DrawText(fmt.ctprintf("reserved virtual mem: %v b", entities.items_arena.total_reserved), 5, 5 + TEXT_SIZE*3, TEXT_SIZE, rl.BLACK)
-	rl.DrawText(fmt.ctprintf("committed virtual mem: %v b", entities.items_arena.total_used), 5, 5 + TEXT_SIZE*4, TEXT_SIZE, rl.BLACK)
+	rl.DrawText(fmt.ctprintf("arena num full blocks: %v", len(entities.items_arena.used_blocks)), 5, 5 + TEXT_SIZE*3, TEXT_SIZE, rl.BLACK)
+	rl.DrawText(fmt.ctprintf("arena bytes left: %v b", entities.items_arena.bytes_left), 5, 5 + TEXT_SIZE*4, TEXT_SIZE, rl.BLACK)
 
 	rl.EndDrawing()
 }
