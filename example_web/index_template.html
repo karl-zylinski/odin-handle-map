@@ -5,8 +5,8 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
 	<title>Odin + Raylib on the web</title>
-	<meta name="title" content="Odin + Raylib on the web">
-	<meta name="description" content="Make games using Odin + Raylib that work in the browser">
+	<meta name="title" content="Odin Handle Map demo">
+	<meta name="description" content="Map handles (index + generation) to items. Demo with 'game entities'">
 	<meta name="viewport" content="width=device-width">
 
 	<style>
@@ -24,9 +24,31 @@
 			margin-right: auto;
 			display: block;
 		}
+		.heading {
+			position: absolute;
+			bottom: 10px;
+			left: 10px;
+			color: #fff1e4;
+			text-decoration: none;
+			z-index: 1;
+			font-family: "Arial", sans-serif;
+			font-size: 24px;
+			font-weight: bold;
+		}
+		.heading span {
+			display: inline-block;
+			margin-right: 24px;
+		}
+		.heading a {
+			color: #113250;
+		}
 	</style>
 </head>
 <body>
+	<div class="heading">
+		<span>Odin Handle Map demo</span>
+		<span><a href="https://github.com/karl-zylinski/odin-handle-map">Source</a></span>
+	</div>
 	<canvas class="game_canvas" id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1" onmousedown="event.target.focus()" onkeydown="event.preventDefault()"></canvas>
 	<script type="text/javascript" src="odin.js"></script>
 	<script>
