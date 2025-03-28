@@ -8,9 +8,6 @@ Read more about handles:
 - [Handles are the better pointers by Andre Weissflog](https://floooh.github.io/2018/06/17/handles-vs-pointers.html)
 - [My blog post on Odin implementations](https://zylinski.se/posts/handle-based-arrays/)
 
-> [!NOTE]
-> You can use this handle-based map on web (WASM). In that case it will use a Dynamic Arena instead of a Virtual Growing Arena. WASM does not support virtual memory. Not using virtual arena is slightly less efficient with regards to memory use, so you may want to tweak the block size. See the `make` proc in `handle_map.odin` for more information.
-
 ## Quick start
 
 ```odin
@@ -53,3 +50,13 @@ main :: proc() {
 ![image](https://github.com/user-attachments/assets/013b0c41-3f28-4592-9854-198bc1427b47)
 
 See `example` folder. It's a game where the player is a circle and you move the mouse to consume other circles. It adds, removes and iterates the handle map. The numbers inside each circle is that entity's generation.
+
+## Web support
+
+Live demo build from `example_web` folder: https://zylinski.se/odin-handle-map-example/
+
+You can use this handle-based map on web (WASM). In that case it will use a Dynamic Arena instead of a Virtual Growing Arena. WASM does not support virtual memory. Not using virtual arena is slightly less efficient with regards to memory use, so you may want to tweak the block size. This is done like this in the `example_web` demo:
+
+```odin
+entities = hm.make(Entity, Entity_Handle, min_items_per_block = 128)
+```
