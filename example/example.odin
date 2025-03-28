@@ -99,8 +99,11 @@ draw :: proc() {
 	rl.DrawText("entities stats", 5, 5, TEXT_SIZE, rl.BLACK)
 	rl.DrawText(fmt.ctprintf("len: %v", hm.len(entities)), 5, 5 + TEXT_SIZE, TEXT_SIZE, rl.BLACK)
 	rl.DrawText(fmt.ctprintf("unused slots: %v", len(entities.unused_items)), 5, 5 + TEXT_SIZE*2, TEXT_SIZE, rl.BLACK)
-	rl.DrawText(fmt.ctprintf("items arena reserved: %v", entities.items_arena.total_reserved), 5, 5 + TEXT_SIZE*3, TEXT_SIZE, rl.BLACK)
-	rl.DrawText(fmt.ctprintf("items arena used: %v", entities.items_arena.total_used), 5, 5 + TEXT_SIZE*4, TEXT_SIZE, rl.BLACK)
+
+	when ODIN_OS != .JS {
+		rl.DrawText(fmt.ctprintf("reserved virtual mem: %v b", entities.items_arena.total_reserved), 5, 5 + TEXT_SIZE*3, TEXT_SIZE, rl.BLACK)
+		rl.DrawText(fmt.ctprintf("committed virtual mem: %v b", entities.items_arena.total_used), 5, 5 + TEXT_SIZE*4, TEXT_SIZE, rl.BLACK)
+	}
 
 	rl.EndDrawing()
 }

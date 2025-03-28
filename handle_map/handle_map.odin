@@ -2,10 +2,6 @@ package handle_map
 
 import "base:runtime"
 import "base:builtin"
-import "core:fmt"
-import vmem "core:mem/virtual"
-
-_ :: fmt
 
 Handle :: struct {
 	idx: u32,
@@ -16,18 +12,18 @@ HANDLE_NONE :: Handle {}
 
 Handle_Map :: struct($T: typeid, $HT: typeid) {
 	items: [dynamic]^T,
-	items_arena: vmem.Arena,
+	items_arena: Arena,
 	unused_items: [dynamic]u32,
 }
 
 delete :: proc(m: ^Handle_Map($T, $HT), loc := #caller_location) {
-	vmem.arena_destroy(&m.items_arena)
+	arena_destroy(&m.items_arena)
 	runtime.delete(m.items, loc)
 	runtime.delete(m.unused_items, loc)
 }
 
 clear :: proc(m: ^Handle_Map($T, $HT), loc := #caller_location) {
-	vmem.arena_free_all(&m.items_arena)
+	arena_free_all(&m.items_arena)
 	runtime.clear(&m.items)
 	runtime.clear(&m.unused_items)
 }
@@ -40,13 +36,12 @@ make :: proc($T: typeid, $HT: typeid, min_items_per_block := DEFAULT_MIN_ITEMS_P
 		unused_items = runtime.make([dynamic]u32, allocator, loc),
 	}
 
-	err := vmem.arena_init_growing(&m.items_arena, uint(min_items_per_block * size_of(T)))
-	fmt.ensuref(err == nil, "Error initializing arena: %v", err)
+	arena_init(&m.items_arena, uint(min_items_per_block * size_of(T)))
 	return m
 }
 
 add :: proc(m: ^Handle_Map($T, $HT), v: T, loc := #caller_location) -> HT {
-	if m.items_arena.curr_block == nil {
+	if !arena_initialized(m.items_arena) {
 		m^ = make(T, HT, loc = loc)
 	}
 
@@ -62,7 +57,7 @@ add :: proc(m: ^Handle_Map($T, $HT), v: T, loc := #caller_location) -> HT {
 		return reused.handle
 	}
 
-	items_allocator := vmem.arena_allocator(&m.items_arena)
+	items_allocator := arena_allocator(&m.items_arena)
 
 	if builtin.len(m.items) == 0 {
 		zero_dummy := new(T, items_allocator)
