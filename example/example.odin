@@ -88,6 +88,7 @@ draw :: proc() {
 		}
 
 		rl.DrawCircleV(e.pos, e.size, e.color)
+		rl.DrawTextEx(rl.GetFontDefault(), fmt.ctprint(h.gen), e.pos - {e.size, e.size}*0.5, e.size, 1, rl.BLACK)
 	}
 
 	if p := hm.get(entities, player); p != nil {
