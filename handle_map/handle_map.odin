@@ -55,10 +55,10 @@ add :: proc(m: ^Handle_Map($T, $HT), v: T, loc := #caller_location) -> HT {
 	if builtin.len(m.unused_items) > 0 {
 		reuse_idx := pop(&m.unused_items)
 		reused := m.items[reuse_idx]
-		h := reused.handle
+		gen := reused.handle.gen
 		reused^ = v
 		reused.handle.idx = u32(reuse_idx)
-		reused.handle.gen = h.gen + 1
+		reused.handle.gen = gen + 1
 		return reused.handle
 	}
 
@@ -97,7 +97,8 @@ remove :: proc(m: ^Handle_Map($T, $HT), h: HT) {
 	if item := m.items[h.idx]; item.handle == h {
 		append(&m.unused_items, h.idx)
 
-		// This makes the item invalid. We'll set the index back if the slot is reused.
+		// This makes the item invalid. `iter` uses that to skip over it.
+		// We'll set the index back if the slot is reused.
 		item.handle.idx = 0
 	}
 }
@@ -120,19 +121,14 @@ make_iter :: proc(m: ^Handle_Map($T, $HT)) -> Handle_Map_Iterator(T, HT) {
 }
 
 iter :: proc(it: ^Handle_Map_Iterator($T, $HT)) -> (val: ^T, h: HT, cond: bool) {
-	cond = it.index < builtin.len(it.m.items)
-
-	for ; cond; cond = it.index < builtin.len(it.m.items) {
-		if it.m.items[it.index].handle.idx == 0 {
-			it.index += 1
-			continue
-		}
-
-		val = it.m.items[it.index]
-		h = val.handle
+	for _ in it.index..<builtin.len(it.m.items) {
+		item := it.m.items[it.index]
 		it.index += 1
-		return
+
+		if item.handle.idx != 0 {
+			return item, item.handle, true
+		}
 	}
 
-	return
+	return nil, {}, false
 }
