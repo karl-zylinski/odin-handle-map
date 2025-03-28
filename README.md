@@ -21,21 +21,30 @@ Entity :: struct {
 }
 
 main :: proc() {
+	// You can also use
+	// `entities := hm.make(Entity, Entity_Handle, min_items_per_block = 2048`
+	// if you want to tweak the arena block size.
 	entities: hm.Handle_Map(Entity, Entity_Handle)
 
 	h1 := hm.add(&entities, Entity { pos = { 5, 7 } })
 	h2 := hm.add(&entities, Entity { pos = { 10, 5 } })
 
+	// Resolve handle -> pointer
 	if h2e := hm.get(entities, h2); h2e != nil {
 		h2e.pos.y = 123
 	}
 
+	// Will remove this entity, leaving an unused slot
 	hm.remove(&entities, h1)
 
+	// Will reuse the slot h1 used
 	h3 := hm.add(&entities, Entity { pos = {1, 2 } })
 
+	// Iterate. You can also use `for e in hm.items {}` and
+	// skip any item where `e.handle.idx == 0`.
 	ent_iter := hm.make_iter(&entities)
 	for e, h in hm.iter(&ent_iter) {
+		// `h` is equivalent to `e.handle`
 		if h == h3 {
 			continue
 		}
