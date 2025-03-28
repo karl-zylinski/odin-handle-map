@@ -28,8 +28,8 @@ delete :: proc(m: ^Handle_Map($T, $HT), loc := #caller_location) {
 
 clear :: proc(m: ^Handle_Map($T, $HT), loc := #caller_location) {
 	vmem.arena_free_all(&m.items_arena)
-	clear(&m.items)
-	clear(&m.unused_items)
+	runtime.clear(&m.items)
+	runtime.clear(&m.unused_items)
 }
 
 DEFAULT_MIN_ITEMS_PER_BLOCK :: 1024
@@ -108,7 +108,7 @@ valid :: proc(m: Handle_Map($T, $HT), h: HT) -> bool {
 }
 
 len :: proc(m: Handle_Map($T, $HT)) -> int {
-	return builtin.len(m.items) - builtin.len(m.unused_items) - 1
+	return max(builtin.len(m.items), 1) - builtin.len(m.unused_items) - 1
 }
 
 Handle_Map_Iterator :: struct($T: typeid, $HT: typeid) {
