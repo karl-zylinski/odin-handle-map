@@ -19,6 +19,7 @@ player: Entity_Handle
 entity_add_at: time.Time
 
 main :: proc() {
+	rl.SetConfigFlags({.WINDOW_RESIZABLE, .VSYNC_HINT})
 	rl.InitWindow(1280, 720, "Entities using Handle Map")
 
 	player = hm.add(&entities, Entity {

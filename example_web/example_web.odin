@@ -1,3 +1,7 @@
+/*
+Same as ../example but works on web.
+*/
+
 package handle_map_example_web
 
 import hm "../handle_map"
@@ -30,9 +34,13 @@ main_start :: proc "c" () {
 
 	web_context = context
 
-	entities = hm.make(Entity, Entity_Handle, 24)
+	// The default for min_items_per_block is 1024. On web we don't have virtual
+	// memory, so we set it to 128. That will lower the memory usage, since
+	// all the whole block will be allocated (committed) at once when using
+	// non-virtual memory.
+	entities = hm.make(Entity, Entity_Handle, min_items_per_block = 128)
 
-	rl.SetConfigFlags({.WINDOW_RESIZABLE})
+	rl.SetConfigFlags({.WINDOW_RESIZABLE, .VSYNC_HINT})
 	rl.InitWindow(1280, 720, "Entities using Handle Map")
 
 	player = hm.add(&entities, Entity {
