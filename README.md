@@ -41,7 +41,8 @@ main :: proc() {
 	h3 := hm.add(&entities, Entity { pos = {1, 2 } })
 
 	// Iterate. You can also use `for e in hm.items {}` and
-	// skip any item where `e.handle.idx == 0`.
+	// skip any item where `e.handle.idx == 0`. The iterator
+	// does that automatically.
 	ent_iter := hm.make_iter(&entities)
 	for e, h in hm.iter(&ent_iter) {
 		// `h` is equivalent to `e.handle`
