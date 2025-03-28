@@ -55,8 +55,9 @@ See `example` folder. It's a game where the player is a circle and you move the 
 
 Live demo build from `example_web` folder: https://zylinski.se/odin-handle-map-example/
 
-You can use this handle-based map on web (WASM). In that case it will use a Dynamic Arena instead of a Virtual Growing Arena. WASM does not support virtual memory. Not using virtual arena is slightly less efficient with regards to memory use, so you may want to tweak the block size. This is done like this in the `example_web` demo:
+> [!NOTE]
+> WASM does not support virtual memory. So on web I use a Dynamic Arena instead of a Growing Virtual Arena. Not using a virtual arena is slightly less efficient with regards to memory use, so you may want to tweak the block size. This is done like this in the `example_web` demo:
 
 ```odin
-entities = hm.make(Entity, Entity_Handle, min_items_per_block = 128)
+entities = hm.make(Entity, Entity_Handle, min_items_per_block = 128) // default is 1024
 ```
