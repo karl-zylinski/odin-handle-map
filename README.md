@@ -2,6 +2,8 @@
 
 Map a handle (index + generation) to an item.
 
+Uses a growing virtual memory arena for the storing the items. This makes pointers stable but the memory is still compact, which makes the performance good when iterating (cache friendly).
+
 Read more about handles:
 - [Handles are the better pointers by Andre Weissflog](https://floooh.github.io/2018/06/17/handles-vs-pointers.html)
 - [My blog post on Odin implementations](https://zylinski.se/posts/handle-based-arrays/)
