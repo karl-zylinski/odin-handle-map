@@ -2,6 +2,10 @@
 
 Map a handle (index + generation) to an item.
 
+Read more about handles:
+- [Handles are the better pointers by Andre Weissflog](https://floooh.github.io/2018/06/17/handles-vs-pointers.html)
+- [My blog post on Odin implementations](https://zylinski.se/posts/handle-based-arrays/)
+
 ## Quick start
 
 ```
