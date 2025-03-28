@@ -8,9 +8,12 @@ Read more about handles:
 - [Handles are the better pointers by Andre Weissflog](https://floooh.github.io/2018/06/17/handles-vs-pointers.html)
 - [My blog post on Odin implementations](https://zylinski.se/posts/handle-based-arrays/)
 
+> [!NOTE]
+> You can use this handle-based map on web (WASM). In that case it will use a Dynamic Arena instead of a Virtual Growing Arena. WASM does not support virtual memory. Not using virtual arena is slightly less efficient with regards to memory use, so you may want to tweak the block size. See the `make` proc in `handle_map.odin` for more information.
+
 ## Quick start
 
-```
+```odin
 import hm "handle_map"
 
 Entity_Handle :: hm.Handle
