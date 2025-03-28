@@ -13,7 +13,7 @@ Read more about handles:
 
 ## Quick start
 
-```
+```odin
 import hm "handle_map"
 
 Entity_Handle :: hm.Handle
