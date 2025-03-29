@@ -48,8 +48,8 @@ main :: proc() {
 }
 
 update :: proc() {
-	// The pointer `p` is stable, even if you remove and add things to the
-	// handle map. This is thanks to the handle map allocating each entity into
+	// The pointer `p` is stable, even if you remove from / add to the handle
+	// map. This is thanks to the handle map allocating each entity into
 	// a virtual growing arena.
 	p := hm.get(entities, player)
 	assert(p != nil, "Couldn't get player pointer")
