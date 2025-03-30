@@ -192,7 +192,7 @@ remove :: proc(m: ^Handle_Map($T, $HT), h: HT) {
 
 // Tells you if a handle maps to a valid item.
 valid :: proc(m: Handle_Map($T, $HT), h: HT) -> bool {
-	return get_ptr(m, h) != nil
+	return get(m, h) != nil
 }
 
 // Tells you how many valid items there are in the handle map. Note how this
