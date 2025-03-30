@@ -47,6 +47,8 @@ main_start :: proc "c" () {
 		size = 30,
 		color = rl.BLACK,
 	})
+
+	assert(hm.valid(entities, player), "The player entity is invalid.")
 }
 
 @export

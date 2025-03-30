@@ -37,6 +37,8 @@ main :: proc() {
 		color = rl.BLACK,
 	})
 
+	assert(hm.valid(entities, player), "The player entity is invalid.")
+
 	for !rl.WindowShouldClose() {
 		update()
 		draw()
