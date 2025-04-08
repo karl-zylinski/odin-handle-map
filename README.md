@@ -8,6 +8,8 @@ Read more about handles:
 - [Handles are the better pointers by Andre Weissflog](https://floooh.github.io/2018/06/17/handles-vs-pointers.html)
 - [My blog post on Odin implementations](https://zylinski.se/posts/handle-based-arrays/)
 
+Variant of the Handle Map that uses a fixed array (no virtual arena): https://github.com/karl-zylinski/odin-handle-map-fixed
+
 ## Quick start
 
 ```odin
