@@ -4,4 +4,4 @@
 *.ll
 *.pdb
 *.rdi
-example_web/build
+examples/*/build

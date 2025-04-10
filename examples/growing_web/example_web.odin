@@ -41,7 +41,7 @@ main_start :: proc "c" () {
 	entities = hm.make(Entity, Entity_Handle, min_items_per_block = 128)
 
 	rl.SetConfigFlags({.WINDOW_RESIZABLE, .VSYNC_HINT})
-	rl.InitWindow(1280, 720, "Entities using Handle Map")
+	rl.InitWindow(1280, 720, "Odin Handle_Map demo (handle_map_growing)")
 
 	player = hm.add(&entities, Entity {
 		size = 30,

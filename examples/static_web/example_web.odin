@@ -2,7 +2,7 @@
 Same as ../example but works on web.
 */
 
-package handle_map_example_web
+package handle_map_static_example_web
 
 import hm "../../handle_map_static"
 import rl "vendor:raylib"
@@ -35,7 +35,7 @@ main_start :: proc "c" () {
 	web_context = context
 
 	rl.SetConfigFlags({.WINDOW_RESIZABLE, .VSYNC_HINT})
-	rl.InitWindow(1280, 720, "Entities using Handle Map (fixed array)")
+	rl.InitWindow(1280, 720, "Odin Handle_Map demo (handle_map_static)")
 
 	reset()
 

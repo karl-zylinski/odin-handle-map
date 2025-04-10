@@ -138,9 +138,9 @@ More examples: See `example/static_virtual`
 
 ## Variant 3: `handle_map_growing`
 
-This is a generic implementation that does not require you to enter any "maximum number of items". It uses a growing virtual arena when allocating the items of the handle-based map. It also works on web, but then it uses a `Dyanmic_Arena`, which is less memory efficient than a virtual arena.
+This is a generic implementation that does not require you to enter any "maximum number of items". It uses a growing virtual arena when allocating the items of the handle-based map. It also works on web, but then it uses a `Dynamic_Arena`, which is less memory efficient than a virtual arena.
 
-There's one big difference from this variant compared to the two. In this one, the `items` array of `Handle_Map` has element type `^T` (pointer to item) instead of just `T`. The items are allocated one-by-one into the growing virtual arena, making them fairly compact in memory. This means you still get quite cache-friendly performance. However, the pointer indirection give a slightly penalty in some cases.
+There's one big difference from this variant compared to the two. In this one, the `items` array of `Handle_Map` has elements of type `^T` (pointer to item) instead of just `T`. The items are allocated one-by-one into the growing virtual arena, making them fairly compact in memory. This means you still get quite cache-friendly performance. However, the pointer indirection give a slight penalty in some cases.
 
 Example:
 

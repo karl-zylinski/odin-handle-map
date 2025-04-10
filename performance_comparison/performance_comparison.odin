@@ -65,7 +65,7 @@ benchmark_static :: proc() {
 	for _ in 0..<NUM_TESTS {
 		ent_iter := hms.make_iter(&static_entities)
 		for e in hms.iter(&ent_iter) {
-			e.pos += { 5, 1}
+			e.pos += { 5, 1 }
 			age_total += e.age
 		}
 	}
@@ -94,7 +94,7 @@ benchmark_static_virtual :: proc() {
 	for _ in 0..<NUM_TESTS {
 		ent_iter := hmv.make_iter(&entities)
 		for e in hmv.iter(&ent_iter) {
-			e.pos += { 5, 1}
+			e.pos += { 5, 1 }
 			age_total += e.age
 		}
 	}
@@ -123,7 +123,7 @@ benchmark_growing :: proc() {
 	for _ in 0..<NUM_TESTS {
 		ent_iter := hmg.make_iter(&entities)
 		for e in hmg.iter(&ent_iter) {
-			e.pos += { 5, 1}
+			e.pos += { 5, 1 }
 			age_total += e.age
 		}
 	}

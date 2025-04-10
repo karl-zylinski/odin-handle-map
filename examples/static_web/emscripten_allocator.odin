@@ -4,7 +4,7 @@ exposes in order to allocate memory. Just like Odin's default heap allocator
 this uses proper alignment, so that maps and simd works.
 */
 
-package handle_map_example_web
+package handle_map_static_example_web
 
 import "core:mem"
 import "core:c"

@@ -1,5 +1,5 @@
 #+build !js
-package handle_map
+package handle_map_growing
 
 import vmem "core:mem/virtual"
 import "core:fmt"
