@@ -12,6 +12,8 @@ Read more about handles:
 - [Handles are the better pointers by Andre Weissflog](https://floooh.github.io/2018/06/17/handles-vs-pointers.html)
 - [My blog post on Odin implementations](https://zylinski.se/posts/handle-based-arrays/)
 
+Learn more about Odin in my book [Understanding the Odin Programming Language](https://odinbook.com).
+
 ## Which variant should I use?
 
 Below I give an overview of the three variants in this repository. They are in order of how complicated they are.
