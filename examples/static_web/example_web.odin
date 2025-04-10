@@ -4,7 +4,7 @@ Same as ../example but works on web.
 
 package handle_map_example_web
 
-import hm "../handle_map"
+import hm "../../handle_map_static"
 import rl "vendor:raylib"
 import "core:time"
 import "core:math/rand"
@@ -21,7 +21,7 @@ Entity :: struct {
 }
 
 Entity_Handle :: distinct hm.Handle
-entities: hm.Handle_Map(Entity, Entity_Handle)
+entities: hm.Handle_Map(Entity, Entity_Handle, 1024)
 player: Entity_Handle
 entity_add_at: time.Time
 web_context: runtime.Context
@@ -34,21 +34,21 @@ main_start :: proc "c" () {
 
 	web_context = context
 
-	// The default for min_items_per_block is 1024. On web we don't have virtual
-	// memory, so we set it to 128. That will lower the memory usage, since
-	// all the whole block will be allocated (committed) at once when using
-	// non-virtual memory.
-	entities = hm.make(Entity, Entity_Handle, min_items_per_block = 128)
-
 	rl.SetConfigFlags({.WINDOW_RESIZABLE, .VSYNC_HINT})
-	rl.InitWindow(1280, 720, "Entities using Handle Map")
+	rl.InitWindow(1280, 720, "Entities using Handle Map (fixed array)")
+
+	reset()
+
+	assert(hm.valid(entities, player), "The player entity is invalid.")
+}
+
+reset :: proc() {
+	hm.clear(&entities)
 
 	player = hm.add(&entities, Entity {
 		size = 30,
 		color = rl.BLACK,
 	})
-
-	assert(hm.valid(entities, player), "The player entity is invalid.")
 }
 
 @export
@@ -63,7 +63,6 @@ main_update :: proc "c" () -> bool {
 @export
 main_end :: proc "c" () {
 	context = web_context
-	hm.delete(&entities)
 	rl.CloseWindow()
 }
 
@@ -74,7 +73,7 @@ web_window_size_changed :: proc "c" (w: c.int, h: c.int) {
 }
 
 update :: proc() {
-	p := hm.get(entities, player)
+	p := hm.get(&entities, player)
 	assert(p != nil, "Couldn't get player pointer")
 	p.pos = rl.GetMousePosition()
 
@@ -112,6 +111,10 @@ update :: proc() {
 
 		entity_add_at = time.now()
 	}
+
+	if rl.IsKeyPressed(.R) {
+		reset()
+	}
 }
 
 draw :: proc() {
@@ -128,16 +131,15 @@ draw :: proc() {
 		rl.DrawTextEx(rl.GetFontDefault(), fmt.ctprint(h.gen), e.pos - {e.size, e.size}*0.5, e.size, 1, rl.BLACK)
 	}
 
-	if p := hm.get(entities, player); p != nil {
+	if p := hm.get(&entities, player); p != nil {
 		rl.DrawCircleV(p.pos, p.size, p.color)
 	}
 
 	TEXT_SIZE :: 28
 	rl.DrawText("entities stats", 5, 5, TEXT_SIZE, rl.BLACK)
-	rl.DrawText(fmt.ctprintf("len: %v", hm.len(entities)), 5, 5 + TEXT_SIZE, TEXT_SIZE, rl.BLACK)
-	rl.DrawText(fmt.ctprintf("unused slots: %v", len(entities.unused_items)), 5, 5 + TEXT_SIZE*2, TEXT_SIZE, rl.BLACK)
-	rl.DrawText(fmt.ctprintf("arena num full blocks: %v", len(entities.items_arena.used_blocks)), 5, 5 + TEXT_SIZE*3, TEXT_SIZE, rl.BLACK)
-	rl.DrawText(fmt.ctprintf("arena bytes left: %v b", entities.items_arena.bytes_left), 5, 5 + TEXT_SIZE*4, TEXT_SIZE, rl.BLACK)
+	rl.DrawText(fmt.ctprintf("num used: %v", hm.num_used(entities)), 5, 5 + TEXT_SIZE, TEXT_SIZE, rl.BLACK)
+	rl.DrawText(fmt.ctprintf("cap: %v", hm.cap(entities)), 5, 5 + TEXT_SIZE*2, TEXT_SIZE, rl.BLACK)
+	rl.DrawText(fmt.ctprintf("num unused: %v", entities.num_unused), 5, 5 + TEXT_SIZE*3, TEXT_SIZE, rl.BLACK)
 
 	rl.EndDrawing()
 }
