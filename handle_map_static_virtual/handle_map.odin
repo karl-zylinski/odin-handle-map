@@ -277,3 +277,14 @@ iter :: proc(it: ^Handle_Map_Iterator($T, $HT, $Max)) -> (val: ^T, h: HT, cond: 
 
 	return nil, {}, false
 }
+
+// If you don't want to use iterator, you can instead do:
+// for &item in my_map.items {
+//     if hm.skip(item) {
+//         continue
+//     }
+//     // do stuff
+// }
+skip :: proc(e: $T) -> bool {
+	return e.handle.idx == 0
+}

@@ -217,7 +217,7 @@ iter :: proc(it: ^Handle_Map_Iterator($T, $HT, $N)) -> (val: ^T, h: HT, cond: bo
 }
 
 // If you don't want to use iterator, you can instead do:
-// for &item in hm.items {
+// for &item in my_map.items {
 //     if hm.skip(item) {
 //         continue
 //     }

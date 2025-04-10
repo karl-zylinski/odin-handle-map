@@ -36,7 +36,7 @@
 //     }
 //     
 //     hm.delete(&entities)
-package handle_map
+package handle_map_growing
 
 import "base:runtime"
 import "base:builtin"
@@ -234,4 +234,15 @@ iter :: proc(it: ^Handle_Map_Iterator($T, $HT)) -> (val: ^T, h: HT, cond: bool) 
 	}
 
 	return nil, {}, false
+}
+
+// If you don't want to use iterator, you can instead do:
+// for &item in my_map.items {
+//     if hm.skip(item) {
+//         continue
+//     }
+//     // do stuff
+// }
+skip :: proc(e: $T) -> bool {
+	return e.handle.idx == 0
 }
