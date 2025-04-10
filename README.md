@@ -18,6 +18,9 @@ Below I give an overview of the three variants in this repository. They are in o
 
 If you are unsure of which to start with, then I recommend Variant 2, with a big "upper limit".
 
+> [!NOTE]
+> The folders are called `handle_map_static` etc, but you can just copy the one you want to your project and rename the folder to `handle_map`.
+
 ## Variant 1: `handle_map_static`
 
 This uses a fixed array for storing the items. This means that no dynamic memory allocations are involved. You'll need to supply the maximum size the handle-based map can have. It'll always use that amount of memory.
