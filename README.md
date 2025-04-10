@@ -6,7 +6,7 @@ A handle-based map is a storage container that maps a handle (index + generation
 
 The handle can be used as a permanent reference to the items in the map. In other words, the handle can be used where you would normally store a pointer or index.
 
-Handles are good because they store the index ("which item?") and also the generation ("is it actually still the same item?").
+Handles are good because they store the index ("which item?") and also the generation ("is it actually still the same item?"). Compared to using pointers, using handles also reduces the risk of dangling pointers to items.
 
 Read more about handles:
 - [Handles are the better pointers by Andre Weissflog](https://floooh.github.io/2018/06/17/handles-vs-pointers.html)
