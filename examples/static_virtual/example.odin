@@ -24,8 +24,7 @@ Entity :: struct {
 }
 
 Entity_Handle :: distinct hm.Handle
-Entity_Map :: hm.Handle_Map(Entity, Entity_Handle, 100000)
-entities: Entity_Map
+entities: hm.Handle_Map(Entity, Entity_Handle, 100000)
 player: Entity_Handle
 entity_add_at: time.Time
 
