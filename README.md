@@ -8,6 +8,8 @@ The handle can be used as a permanent reference to the items in the map. In othe
 
 Handles are good because they store the index ("which item?") and also the generation ("is it actually still the same item?"). Compared to using pointers, using handles also reduces the risk of dangling pointers to items.
 
+I've written a blog post that gives an overview of this repository: https://zylinski.se/posts/handle-based-maps-three-implementations/
+
 Read more about handles:
 - [Handles are the better pointers by Andre Weissflog](https://floooh.github.io/2018/06/17/handles-vs-pointers.html)
 - [My blog post on Odin implementations](https://zylinski.se/posts/handle-based-arrays/)
