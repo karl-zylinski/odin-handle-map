@@ -162,7 +162,7 @@ Entity :: struct {
 
 main :: proc() {
 	// You can also use
-	// `entities := hm.make(Entity, Entity_Handle, min_items_per_block = 2048`
+	// `entities := hm.make(Entity, Entity_Handle, min_items_per_block = 2048)`
 	// if you want to tweak the arena block size.
 	entities: hm.Handle_Map(Entity, Entity_Handle)
 
