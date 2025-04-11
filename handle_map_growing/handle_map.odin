@@ -76,8 +76,6 @@ Handle_Map :: struct($T: typeid, $HT: typeid) {
 	unused_items: [dynamic]u32,
 }
 
-DEFAULT_MIN_ITEMS_PER_BLOCK :: 1024
-
 // Create a `Handle_Map` for the given item type `T` and handle type `HT`. The
 // handle type should usually be defined as
 //     Handle_Type :: distinct Handle
@@ -89,13 +87,13 @@ DEFAULT_MIN_ITEMS_PER_BLOCK :: 1024
 //
 // NOTE: You only need to use this proc if you need to specify
 // `min_items_per_block`. You can use a zero-initialized `Handle_Map` otherwise.
-make :: proc($T: typeid, $HT: typeid, min_items_per_block := DEFAULT_MIN_ITEMS_PER_BLOCK, allocator := context.allocator, loc := #caller_location) -> Handle_Map(T, HT) {
+make :: proc($T: typeid, $HT: typeid, min_items_per_block: int = (ARENA_DEFAULT_BLOCK_SIZE/size_of(T)), allocator := context.allocator, loc := #caller_location) -> Handle_Map(T, HT) {
 	m := Handle_Map(T, HT) {
 		items = runtime.make([dynamic]^T, allocator, loc),
 		unused_items = runtime.make([dynamic]u32, allocator, loc),
 	}
 
-	arena_init(&m.items_arena, uint(min_items_per_block * size_of(T)))
+	arena_init(&m.items_arena, min_items_per_block*size_of(T), allocator)
 	return m
 }
 
