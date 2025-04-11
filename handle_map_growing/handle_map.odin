@@ -1,41 +1,55 @@
-// The Handle_Map maps a handle to an item. A handle consists of an index and
-// a generation. The item can be any type. Such a handle can be stored as a
-// permanent reference, where you'd usually store a pointer. The benefit of
-// storing handles instead of pointers is that you have less trouble with
-// dangling pointers.
-// 
-// Example (assumes this package is imported under the alias `hm`):
-//     Entity_Handle :: hm.Handle
-//     
-//     Entity :: struct {
-//         handle: Entity_Handle,
-//         pos: [2]f32,
-//     }
-//     
-//     entities: hm.Handle_Map(Entity, Entity_Handle)
-//     h1 := hm.add(&entities, Entity { pos = { 5, 7 } })
-//     h2 := hm.add(&entities, Entity { pos = { 10, 5 } })
-//
-//     // Resolve handle -> pointer
-//     if h2e := hm.get(entities, h2); h2e != nil {
-//         h2e.pos.y = 123
-//     }
-//     
-//     // Will remove this entity, leaving an unused slot
-//     hm.remove(&entities, h1)
-//     
-//     // Will reuse the slot h1 used
-//     h3 := hm.add(&entities, Entity { pos = {1, 2 } })
-//     
-//     // Iterate. You can also use `for e in hm.items {}` and
-//     // skip any item where `e.handle.idx == 0`. The iterator
-//     // does that automatically.
-//     ent_iter := hm.make_iter(&entities)
-//     for e, h in hm.iter(&ent_iter) {
-//         e.pos += { 5, 1}
-//     }
-//     
-//     hm.delete(&entities)
+/* Handle-based map using growing virtual arena. By Karl Zylinski (karl@zylinski.se)
+
+The Handle_Map maps a handle to an item. A handle consists of an index and a
+generation. The item can be any type. Such a handle can be stored as a permanent
+reference, where you'd usually store a pointer. The benefit of storing handles
+instead of pointers is that you know if a slot has been reused, thanks to the
+generation number. This makes it much easier to several systems to work with,
+and store references to the items in the handle map.
+
+This implementation stores an array of pointers to items. Those items are
+allocated into a virtual growing arena. They'll never move within the virtual
+growing arena, so pointers are stable.
+
+Example (assumes this package is imported under the alias `hm`):
+
+	Entity_Handle :: hm.Handle
+
+	Entity :: struct {
+		// All items must contain a handle
+		handle: Entity_Handle,
+		pos: [2]f32,
+	}
+
+	// You can also use
+	// `entities := hm.make(Entity, Entity_Handle, min_items_per_block = 2048)`
+	// if you want to tweak the arena block size.
+	entities: hm.Handle_Map(Entity, Entity_Handle)
+
+	h1 := hm.add(&entities, Entity { pos = { 5, 7 } })
+	h2 := hm.add(&entities, Entity { pos = { 10, 5 } })
+
+	// Resolve handle -> pointer
+	if h2e := hm.get(entities, h2); h2e != nil {
+		h2e.pos.y = 123
+	}
+
+	// Will remove this entity, leaving an unused slot
+	hm.remove(&entities, h1)
+
+	// Will reuse the slot h1 used
+	h3 := hm.add(&entities, Entity { pos = { 1, 2 } })
+
+	// Iterate. You can also use `for e in hm.items {}` and
+	// skip any item where `e.handle.idx == 0`. The iterator
+	// does that automatically.
+	ent_iter := hm.make_iter(&entities)
+	for e, h in hm.iter(&ent_iter) {
+		e.pos += { 5, 1 }
+	}
+
+	hm.delete(&entities)
+*/
 package handle_map_growing
 
 import "base:runtime"

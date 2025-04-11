@@ -46,14 +46,14 @@ Example (assumes this package is imported under the alias `hm`):
 	hm.remove(&entities, h1)
 
 	// Will reuse the slot h1 used
-	h3 := hm.add(&entities, Entity { pos = {1, 2 } })
+	h3 := hm.add(&entities, Entity { pos = { 1, 2 } })
 
 	// Iterate. You can also use `for e in hm.items {}` and skip any item where
 	// `e.handle.idx == 0`. The iterator does that automatically. There's also
 	// `skip` procedure in this package that check `e.handle.idx == 0` for you.
 	ent_iter := hm.make_iter(&entities)
 	for e, h in hm.iter(&ent_iter) {
-		e.pos += { 5, 1}
+		e.pos += { 5, 1 }
 	}
 
 	hm.delete(&entities)
