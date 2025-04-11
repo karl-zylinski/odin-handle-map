@@ -1,51 +1,63 @@
-// The Handle_Map maps a handle to an item. A handle consists of an index and
-// a generation. The item can be any type. Such a handle can be stored as a
-// permanent reference, where you'd usually store a pointer. The benefit of
-// storing handles instead of pointers is that you know if a slot has been
-// reused, thanks to the generation number. This makes it much easier to several
-// systems to work with, and store references to the items in the handle map.
-//
-// This implementation uses a static virtual arena which a dynamic array lives
-// inside. This means that virtual memory is reserved up-front when the handle
-// map is created. You can use a very big maximum size since it is just a
-// reservation: Reserving virtual memory does not make the memory usage go up.
-//
-// Odin's virtual arena lets the dynamic array grow in-place as long as no other
-// allocation into the arena has happened since, which is always the case here.
-// So no pointers will ever move!
-// 
-// Example (assumes this package is imported under the alias `hm`):
-//     Entity_Handle :: hm.Handle
-//     
-//     Entity :: struct {
-//         handle: Entity_Handle,
-//         pos: [2]f32,
-//     }
-//     
-//     entities: hm.Handle_Map(Entity, Entity_Handle, 10000)
-//     h1 := hm.add(&entities, Entity { pos = { 5, 7 } })
-//     h2 := hm.add(&entities, Entity { pos = { 10, 5 } })
-//
-//     // Resolve handle -> pointer
-//     if h2e := hm.get(entities, h2); h2e != nil {
-//         h2e.pos.y = 123
-//     }
-//     
-//     // Will remove this entity, leaving an unused slot
-//     hm.remove(&entities, h1)
-//     
-//     // Will reuse the slot h1 used
-//     h3 := hm.add(&entities, Entity { pos = {1, 2 } })
-//     
-//     // Iterate. You can also use `for e in hm.items {}` and
-//     // skip any item where `e.handle.idx == 0`. The iterator
-//     // does that automatically.
-//     ent_iter := hm.make_iter(&entities)
-//     for e, h in hm.iter(&ent_iter) {
-//         e.pos += { 5, 1}
-//     }
-//     
-//     hm.delete(&entities)
+/* Handle-based map using static virtual arena. By Karl Zylinski (karl@zylinski.se)
+
+The Handle_Map maps a handle to an item. A handle consists of an index and a
+generation. The item can be any type. Such a handle can be stored as a permanent
+reference, where you'd usually store a pointer. The benefit of storing handles
+instead of pointers is that you know if a slot has been reused, thanks to the
+generation number. This makes it much easier to several systems to work with,
+and store references to the items in the handle map.
+
+This implementation uses a dynamic array and static virtual arena. The dynamic
+array allocates its data (its items) into the arena. This means that virtual
+memory is reserved up-front when the handle map is created. You can use a very
+big up-front reservation since it is just a reservation: Reserving virtual
+memory does not make the memory usage go up. It goes up when the dynamic array
+actually grows into that reserved space.
+
+Odin's virtual arena lets the dynamic array grow in-place as long as no other
+allocation into the arena has happened in-between, which is always the case here.
+So no pointers will ever move!
+
+Example (assumes this package is imported under the alias `hm`):
+
+	Entity_Handle :: hm.Handle
+
+	Entity :: struct {
+		// All items must contain a handle
+		handle: Entity_Handle,
+		pos: [2]f32,
+	}
+
+	// The number 10000 results in a virtual reserve of 10000*size_of(Entity)
+	// bytes. It's just a reserve. The physical memory usage will go up when
+	// that memory is committed as part of the dynamic array inside the
+	// Handle_Map grows.
+	entities: hm.Handle_Map(Entity, Entity_Handle, 10000)
+
+	h1 := hm.add(&entities, Entity { pos = { 5, 7 } })
+	h2 := hm.add(&entities, Entity { pos = { 10, 5 } })
+
+	// Resolve handle -> pointer
+	if h2e := hm.get(entities, h2); h2e != nil {
+		h2e.pos.y = 123
+	}
+
+	// Will remove this entity, leaving an unused slot
+	hm.remove(&entities, h1)
+
+	// Will reuse the slot h1 used
+	h3 := hm.add(&entities, Entity { pos = {1, 2 } })
+
+	// Iterate. You can also use `for e in hm.items {}` and skip any item where
+	// `e.handle.idx == 0`. The iterator does that automatically. There's also
+	// `skip` procedure in this package that check `e.handle.idx == 0` for you.
+	ent_iter := hm.make_iter(&entities)
+	for e, h in hm.iter(&ent_iter) {
+		e.pos += { 5, 1}
+	}
+
+	hm.delete(&entities)
+*/
 package handle_map_virtual
 
 import "base:runtime"
