@@ -2,13 +2,13 @@
 package handle_map_growing
 
 import vmem "core:mem/virtual"
-import "core:fmt"
+import "base:runtime"
 
 Arena :: vmem.Arena
 
-arena_init :: proc(arena: ^Arena, block_size: int = ARENA_DEFAULT_BLOCK_SIZE, allocator := context.allocator) {
-	err := vmem.arena_init_growing(arena, uint(block_size))
-	fmt.ensuref(err == nil, "Error initializing arena: %v", err)
+@require_results
+arena_init :: proc(arena: ^Arena, block_size: int = ARENA_DEFAULT_BLOCK_SIZE, allocator := context.allocator) -> runtime.Allocator_Error {
+	return vmem.arena_init_growing(arena, uint(block_size))
 
 	// NOTE: allocator not used, it's just for the JS version.
 }

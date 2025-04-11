@@ -87,14 +87,19 @@ Handle_Map :: struct($T: typeid, $HT: typeid) {
 //
 // NOTE: You only need to use this proc if you need to specify
 // `min_items_per_block`. You can use a zero-initialized `Handle_Map` otherwise.
-make :: proc($T: typeid, $HT: typeid, min_items_per_block: int = (ARENA_DEFAULT_BLOCK_SIZE/size_of(T)), allocator := context.allocator, loc := #caller_location) -> Handle_Map(T, HT) {
+make :: proc(
+	$T: typeid,
+	$HT: typeid,
+	min_items_per_block: int = (ARENA_DEFAULT_BLOCK_SIZE/size_of(T)),
+	allocator := context.allocator,
+	loc := #caller_location) -> (res: Handle_Map(T, HT), err: runtime.Allocator_Error) #optional_allocator_error {
 	m := Handle_Map(T, HT) {
 		items = runtime.make([dynamic]^T, allocator, loc),
 		unused_items = runtime.make([dynamic]u32, allocator, loc),
 	}
 
-	arena_init(&m.items_arena, min_items_per_block*size_of(T), allocator)
-	return m
+	arena_init(&m.items_arena, min_items_per_block*size_of(T), allocator) or_return
+	return m, nil
 }
 
 // Deallocate all memory associated with the Handle_Map.
@@ -121,9 +126,9 @@ clear :: proc(m: ^Handle_Map($T, $HT), loc := #caller_location) {
 // to the items being packed in the arena.
 //
 // Will reuse slots from `unused_items` array if there are any.
-add :: proc(m: ^Handle_Map($T, $HT), v: T, loc := #caller_location) -> HT {
+add :: proc(m: ^Handle_Map($T, $HT), v: T, loc := #caller_location) -> (res: HT, err: runtime.Allocator_Error) #optional_allocator_error {
 	if !arena_initialized(m.items_arena) {
-		m^ = make(T, HT, loc = loc)
+		m^ = make(T, HT, loc = loc) or_return
 	}
 
 	v := v
@@ -135,22 +140,22 @@ add :: proc(m: ^Handle_Map($T, $HT), v: T, loc := #caller_location) -> HT {
 		reused^ = v
 		reused.handle.idx = u32(reuse_idx)
 		reused.handle.gen = gen + 1
-		return reused.handle
+		return reused.handle, nil
 	}
 
 	items_allocator := arena_allocator(&m.items_arena)
 
 	if builtin.len(m.items) == 0 {
-		zero_dummy := new(T, items_allocator)
+		zero_dummy := new(T, items_allocator) or_return
 		append(&m.items, zero_dummy)
 	}
 
-	new_item := new(T, items_allocator)
+	new_item := new(T, items_allocator) or_return
 	new_item^ = v
 	new_item.handle.idx = u32(builtin.len(m.items))
 	new_item.handle.gen = 1
 	append(&m.items, new_item)
-	return new_item.handle 
+	return new_item.handle, nil
 }
 
 // Resolve a handle to a pointer of type `^T`. The pointer is stable due to

@@ -2,11 +2,13 @@
 package handle_map_growing
 
 import "core:mem"
+import "base:runtime"
 
 Arena :: mem.Dynamic_Arena
 
-arena_init :: proc(arena: ^Arena, block_size: int = ARENA_DEFAULT_BLOCK_SIZE, allocator := context.allocator) {
+arena_init :: proc(arena: ^Arena, block_size: int = ARENA_DEFAULT_BLOCK_SIZE, allocator := context.allocator) -> runtime.Allocator_Error {
 	mem.dynamic_arena_init(arena, block_allocator = allocator, array_allocator = allocator, block_size = block_size)
+	return nil
 }
 
 arena_destroy :: mem.dynamic_arena_destroy
