@@ -4,7 +4,9 @@ The Handle_Map maps a handle to an item. A handle consists of an index and a
 generation. The item can be any type. Such a handle can be stored as a permanent
 reference, where you'd usually store a pointer. The benefit of handles is that
 you know if some other system has destroyed the object at that index, since the
-generation will then differ. This implementation uses fixed arrays and therefore
+generation will then differ.
+
+This implementation uses fixed arrays and therefore
 involves no dynamic memory allocations.
 
 Example (assumes this package is imported under the alias `hm`):
