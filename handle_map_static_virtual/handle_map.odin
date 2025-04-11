@@ -91,7 +91,7 @@ Handle_Map :: struct($T: typeid, $HT: typeid, $Max: int) {
 // Usually you can just declare the Handle_Map using
 // `hm: Handle_Map(Item_Type, Handle_Type, 10000)`, but if you want to override
 // the allocator used for `unused_items`, then you can instead do:
-// `hm := hm.make(Item_Type, Handle_Tyoe, 10000, some_allocator)`
+// `hm := hm.make(Item_Type, Handle_Type, 10000, some_allocator)`
 make :: proc($T: typeid, $HT: typeid, $Max: int, allocator := context.allocator, loc := #caller_location) -> (Handle_Map(T, HT, Max), vmem.Allocator_Error) #optional_allocator_error {
 	arena_bootstrap: vmem.Arena
 	err := vmem.arena_init_static(&arena_bootstrap, uint(Max * size_of(T) + size_of(vmem.Arena)))
@@ -146,7 +146,7 @@ clear :: proc(m: ^Handle_Map($T, $HT, $Max), loc := #caller_location) {
 // Will reuse slots from `unused_items` array if there are any.
 add :: proc(m: ^Handle_Map($T, $HT, $Max), v: T, loc := #caller_location) -> (res: HT, err: vmem.Allocator_Error) #optional_allocator_error {
 	if m.items_arena == nil {
-		m^ = make(T, HT, Max, loc = loc)
+		m^ = make(T, HT, Max, loc = loc) or_return
 	}
 
 	v := v
