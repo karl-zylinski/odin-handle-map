@@ -85,8 +85,9 @@ Handle_Map :: struct($T: typeid, $HT: typeid) {
 // has the minimum block size 4096 (a single memory page). So the block size
 // will be `4096` if `min_items_per_block * size_of(T) < 4096`
 //
-// NOTE: You only need to use this proc if you need to specify
-// `min_items_per_block`. You can use a zero-initialized `Handle_Map` otherwise.
+// `allocator` specifies which allocator to use for the `items` and `unused_items`
+// arrays. It will also be used on web builds for the Dynamic_Arena used on
+// that platform.
 make :: proc(
 	$T: typeid,
 	$HT: typeid,
