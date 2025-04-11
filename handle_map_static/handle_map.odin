@@ -1,50 +1,49 @@
-// Handle map using fixed arrays. By Karl Zylinski (karl@zylinski.se)
-// ------------------------------------------------------------------
-//
-// The Handle_Map maps a handle to an item. A handle consists of an index and
-// a generation. The item can be any type. Such a handle can be stored as a
-// permanent reference, where you'd usually store a pointer. The benefit of
-// handles is that you know if some other system has destroyed the object at
-// that index, since the generation will then differ.
-//
-// This implementation uses fixed arrays and therefore involves no dynamic
-// memory allocations.
-//
-// Example (assumes this package is imported under the alias `hm`):
-//     Entity_Handle :: hm.Handle
-//     
-//     Entity :: struct {
-//         // All items must contain a handle
-//         handle: Entity_Handle,
-//         pos: [2]f32,
-//     }
-//
-//     // Note: We use `1024`, if you use a bigger number within a proc you may
-//     // blow the stack. In those cases: Store the array inside a global
-//     // variable or a dynamically allocated struct.
-//     entities: hm.Handle_Map(Entity, Entity_Handle, 1024)
-//
-//     h1 := hm.add(&entities, Entity { pos = { 5, 7 } })
-//     h2 := hm.add(&entities, Entity { pos = { 10, 5 } })
-//
-//     // Resolve handle -> pointer
-//     if h2e := hm.get(&entities, h2); h2e != nil {
-//         h2e.pos.y = 123
-//     }
-//     
-//     // Will remove this entity, leaving an unused slot
-//     hm.remove(&entities, h1)
-//     
-//     // Will reuse the slot h1 used
-//     h3 := hm.add(&entities, Entity { pos = {1, 2 } })
-//     
-//     // Iterate. You can also use `for e in hm.items {}` and
-//     // skip any item where `e.handle.idx == 0`. The iterator
-//     // does that automatically.
-//     ent_iter := hm.make_iter(&entities)
-//     for e, h in hm.iter(&ent_iter) {
-//         e.pos += { 5, 1}
-//     }
+/* Handle-based map using fixed arrays. By Karl Zylinski (karl@zylinski.se)
+
+The Handle_Map maps a handle to an item. A handle consists of an index and a
+generation. The item can be any type. Such a handle can be stored as a permanent
+reference, where you'd usually store a pointer. The benefit of handles is that
+you know if some other system has destroyed the object at that index, since the
+generation will then differ. This implementation uses fixed arrays and therefore
+involves no dynamic memory allocations.
+
+Example (assumes this package is imported under the alias `hm`):
+
+	Entity_Handle :: hm.Handle
+
+	Entity :: struct {
+		// All items must contain a handle
+		handle: Entity_Handle,
+		pos: [2]f32,
+	}
+
+	// Note: We use `1024`, if you use a bigger number within a proc you may
+	// blow the stack. In those cases: Store the array inside a global variable
+	// or a dynamically allocated struct.
+	entities: hm.Handle_Map(Entity, Entity_Handle, 1024)
+
+	h1 := hm.add(&entities, Entity { pos = { 5, 7 } })
+	h2 := hm.add(&entities, Entity { pos = { 10, 5 } })
+
+	// Resolve handle -> pointer
+	if h2e := hm.get(&entities, h2); h2e != nil {
+		h2e.pos.y = 123
+	}
+
+	// Will remove this entity, leaving an unused slot
+	hm.remove(&entities, h1)
+
+	// Will reuse the slot h1 used
+	h3 := hm.add(&entities, Entity { pos = {1, 2 } })
+
+	// Iterate. You can also use `for e in hm.items {}` and skip any item where
+	// `e.handle.idx == 0`. The iterator does that automatically. There's also
+	// `skip` procedure in this package that check `e.handle.idx == 0` for you.
+	ent_iter := hm.make_iter(&entities)
+	for e, h in hm.iter(&ent_iter) {
+		e.pos += { 5, 1}
+	}
+*/
 package handle_map_fixed
 
 import "base:intrinsics"
