@@ -98,7 +98,9 @@ clear :: proc(m: ^Handle_Map($T, $HT, $N)) {
 // permanent reference.
 //
 // Will reuse the item at `next_unused` if that value is non-zero.
-add :: proc(m: ^Handle_Map($T, $HT, $N), v: T) -> HT {
+//
+// Second return value is `false` if the handle-based map is full.
+add :: proc(m: ^Handle_Map($T, $HT, $N), v: T) -> (HT, bool) #optional_ok {
 	v := v
 
 	if m.next_unused != 0 {
@@ -111,7 +113,7 @@ add :: proc(m: ^Handle_Map($T, $HT, $N), v: T) -> HT {
 		item.handle.idx = u32(idx)
 		item.handle.gen = gen + 1
 		m.num_unused -= 1
-		return item.handle
+		return item.handle, true
 	}
 
 	// We always have a "dummy item" at index zero. This is because handle.idx
@@ -122,7 +124,7 @@ add :: proc(m: ^Handle_Map($T, $HT, $N), v: T) -> HT {
 	}
 
 	if m.num_items == len(m.items) {
-		return {}
+		return {}, false
 	}
 
 	item := &m.items[m.num_items]
@@ -130,7 +132,7 @@ add :: proc(m: ^Handle_Map($T, $HT, $N), v: T) -> HT {
 	item.handle.idx = u32(m.num_items)
 	item.handle.gen = 1
 	m.num_items += 1
-	return item.handle 
+	return item.handle, true
 }
 
 // Resolve a handle to a pointer of type `^T`. The pointer is stable since the
