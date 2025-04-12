@@ -64,10 +64,6 @@ Handle :: struct {
 
 Handle_Map :: struct($T: typeid, $HT: typeid, $N: int) {
 	// Each item must have a field `handle` of type `HT`.
-	//
-	// There's always a "dummy element" at index 0. This way, a Handle with
-	// `idx == 0` means "no Handle". This means that you actually have `N - 1`
-	// items available.
 	items: [N]T,
 
 	// How much of `items` that is in use.
@@ -104,7 +100,7 @@ clear :: proc(m: ^Handle_Map($T, $HT, $N)) {
 add :: proc(m: ^Handle_Map($T, $HT, $N), v: T) -> (HT, bool) #optional_ok {
 	v := v
 
-	if m.next_unused != 0 {
+	if m.num_unused > 0 {
 		idx := m.next_unused
 		item := &m.items[idx]
 		m.next_unused = m.unused_items[idx]
@@ -115,13 +111,6 @@ add :: proc(m: ^Handle_Map($T, $HT, $N), v: T) -> (HT, bool) #optional_ok {
 		item.handle.gen = gen + 1
 		m.num_unused -= 1
 		return item.handle, true
-	}
-
-	// We always have a "dummy item" at index zero. This is because handle.idx
-	// being zero means "no item", so we can't use that slot for anything.
-	if m.num_items == 0 {
-		m.items[0] = {}
-		m.num_items += 1
 	}
 
 	if m.num_items == len(m.items) {
@@ -142,7 +131,7 @@ add :: proc(m: ^Handle_Map($T, $HT, $N), v: T) -> (HT, bool) #optional_ok {
 // reuses that slot. Only store handles permanently and temporarily resolve them
 // into pointers as needed.
 get :: proc(m: ^Handle_Map($T, $HT, $N), h: HT) -> ^T {
-	if h.idx <= 0 || h.idx >= m.num_items {
+	if h.gen == 0 || h.idx < 0 || h.idx >= m.num_items {
 		return nil
 	}
 
@@ -158,7 +147,7 @@ get :: proc(m: ^Handle_Map($T, $HT, $N), h: HT) -> ^T {
 // set on `m.next_unused`. Also, the item's `handle.idx` is set to zero, this
 // is used by the `iter` proc in order to skip that item when iterating.
 remove :: proc(m: ^Handle_Map($T, $HT, $N), h: HT) {
-	if h.idx <= 0 || h.idx >= m.num_items {
+	if h.idx < 0 || h.idx >= m.num_items {
 		return
 	}
 
@@ -166,14 +155,14 @@ remove :: proc(m: ^Handle_Map($T, $HT, $N), h: HT) {
 		m.unused_items[h.idx] = m.next_unused
 		m.next_unused = h.idx
 		m.num_unused += 1
-		item.handle.idx = 0
+		item.handle.gen = 0
 	}
 }
 
 // Tells you if a handle maps to a valid item. This is done by checking if the
 // handle on the item is the same as the passed handle.
 valid :: proc(m: Handle_Map($T, $HT, $N), h: HT) -> bool {
-	return h.idx > 0 && h.idx < m.num_items && m.items[h.idx].handle == h
+	return h.gen > 0 && h.idx >= 0 && h.idx < m.num_items && m.items[h.idx].handle == h
 }
 
 // Tells you how many valid items there are in the handle map.
