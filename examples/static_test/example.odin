@@ -39,10 +39,11 @@ main :: proc() {
 	assert(hm.valid(entities, handles[0]) == false, "The test entity expected to be invalid.")
 
 	for i in 0..<MAX_ENTITIES {
-		handle := hm.add(&entities, Entity{
+		handle2 := hm.add(&entities, Entity{
 			id = count
 		})
-		handles[i] = handle
+		assert(hm.valid(entities, handles[i]) == false, "The previously deleted test entity expected to be invalid")
+		handles[i] = handle2
 		count += 1
 	}
 	assert(hm.valid(entities, handles[0]) == true, "The test entity is expected to be valid.")

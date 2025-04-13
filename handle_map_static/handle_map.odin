@@ -59,7 +59,7 @@ Handle :: struct {
 	// When using the `get` proc, this will be matched to the `gen` on the item
 	// in the handle map. The handle is only valid if they match. If they don't
 	// match, then it means that the slot in the handle map has been reused.
-	gen: u32,
+	gen: i32,
 }
 
 Handle_Map :: struct($T: typeid, $HT: typeid, $N: int) {
@@ -108,7 +108,7 @@ add :: proc(m: ^Handle_Map($T, $HT, $N), v: T) -> (HT, bool) #optional_ok {
 		gen := item.handle.gen
 		item^ = v
 		item.handle.idx = u32(idx)
-		item.handle.gen = gen + 1
+		item.handle.gen = gen * -1 + 1
 		m.num_unused -= 1
 		return item.handle, true
 	}
@@ -155,7 +155,7 @@ remove :: proc(m: ^Handle_Map($T, $HT, $N), h: HT) {
 		m.unused_items[h.idx] = m.next_unused
 		m.next_unused = h.idx
 		m.num_unused += 1
-		item.handle.gen = 0
+		item.handle.gen *= -1
 	}
 }
 
