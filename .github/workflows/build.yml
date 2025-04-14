@@ -94,14 +94,14 @@ jobs:
         run: odin build examples/growing -vet -strict-style
       
       - name: Build growing web example
-        working-directory: \/examples/growing_web
+        working-directory: .\examples\growing_web
         run: .\build.bat
 
       - name: Build static example
         run: odin build examples/static -vet -strict-style
 
       - name: Build static web example
-        working-directory: .\examples/static_web
+        working-directory: .\examples\static_web
         run: .\build.bat
 
       - name: Build static virtual example
