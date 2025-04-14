@@ -1,0 +1,111 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+
+jobs:
+  build_linux:
+    name: Linux
+    runs-on: ubuntu-latest
+    steps:
+      - uses: laytan/setup-odin@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - uses: mymindstorm/setup-emsdk@v14
+      
+      - uses: actions/checkout@v4
+      
+      - name: Build growing example
+        run: odin build examples/growing -vet -strict-style
+      
+      - name: Build growing web example
+        working-directory: ./examples/growing_web
+        run: ./build.sh
+
+      - name: Build static example
+        run: odin build examples/static -vet -strict-style
+
+      - name: Build static web example
+        working-directory: ./examples/static_web
+        run: ./build.sh
+
+      - name: Build static virtual example
+        run: odin build examples/static_virtual -vet -strict-style
+
+      - name: Run performance comparison 
+        run: odin run performance_comparison -vet -strict-style -no-bounds-check -o:speed
+
+  build_macos:
+    name: MacOS
+    strategy:
+      matrix:
+        os: [macos-13, macos-15]
+    runs-on: ${{matrix.os}}
+    steps:
+      - uses: laytan/setup-odin@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - uses: mymindstorm/setup-emsdk@v14
+
+      - uses: actions/checkout@v4
+
+      - name: Build growing example
+        run: odin build examples/growing -vet -strict-style
+      
+      - name: Build growing web example
+        working-directory: ./examples/growing_web
+        run: ./build.sh
+
+      - name: Build static example
+        run: odin build examples/static -vet -strict-style
+
+      - name: Build static web example
+        working-directory: ./examples/static_web
+        run: ./build.sh
+
+      - name: Build static virtual example
+        run: odin build examples/static_virtual -vet -strict-style
+
+      - name: Run performance comparison 
+        run: odin run performance_comparison -vet -strict-style -no-bounds-check -o:speed
+
+  build_windows:
+    name: Windows
+    runs-on: windows-latest
+    steps:
+      - uses: laytan/setup-odin@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: mymindstorm/setup-emsdk@v14
+
+      - uses: actions/checkout@v4
+      - uses: ilammy/msvc-dev-cmd@v1
+
+        - name: Build growing example
+        run: odin build examples/growing -vet -strict-style
+      
+      - name: Build growing web example
+        working-directory: \/examples/growing_web
+        run: .\build.bat
+
+      - name: Build static example
+        run: odin build examples/static -vet -strict-style
+
+      - name: Build static web example
+        working-directory: .\examples/static_web
+        run: .\build.bat
+
+      - name: Build static virtual example
+        run: odin build examples/static_virtual -vet -strict-style
+
+      - name: Run performance comparison 
+        run: odin run performance_comparison -vet -strict-style -no-bounds-check -o:speed
