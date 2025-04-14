@@ -90,7 +90,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ilammy/msvc-dev-cmd@v1
 
-        - name: Build growing example
+      - name: Build growing example
         run: odin build examples/growing -vet -strict-style
       
       - name: Build growing web example
