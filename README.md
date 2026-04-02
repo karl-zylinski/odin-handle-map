@@ -1,5 +1,8 @@
 # Handle-based map for Odin
 
+>[!NOTE]
+>A type called "handle-based map" has been added to Odin's core collection. Check it out: https://pkg.odin-lang.org/core/container/handle_map/
+
 This repository contains three variants of a handle-based map.
 
 A handle-based map is a storage container that maps a handle (index + generation) to an item.
