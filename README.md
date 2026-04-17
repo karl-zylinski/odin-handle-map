@@ -1,7 +1,7 @@
-# Handle-based map for Odin
+>[!WARNING]
+>A type called "handle-based map" has been added to Odin's core collection. Check it out: https://pkg.odin-lang.org/core/container/handle_map/ -- Therefore this repository has been archived.
 
->[!NOTE]
->A type called "handle-based map" has been added to Odin's core collection. Check it out: https://pkg.odin-lang.org/core/container/handle_map/
+# Handle-based map for Odin
 
 This repository contains three variants of a handle-based map.
 
